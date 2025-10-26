@@ -1,10 +1,35 @@
 import knex from 'knex';
-import knexConfig from '../../knexfile';
+import { config as appConfig } from '../config';
+
+const knexConfigs: any = {
+  development: {
+    client: 'postgresql',
+    connection: {
+      host: appConfig.database.host,
+      port: appConfig.database.port,
+      database: appConfig.database.name,
+      user: appConfig.database.user,
+      password: appConfig.database.password,
+    },
+    migrations: {
+      directory: './dist/database/migrations',
+      extension: 'js',
+    },
+  },
+  production: {
+    client: 'postgresql',
+    connection: appConfig.database.url,
+    migrations: {
+      directory: './dist/database/migrations',
+      extension: 'js',
+    },
+  },
+};
 
 const environment = process.env.NODE_ENV || 'development';
-const config = knexConfig[environment];
+const knexConfig = knexConfigs[environment];
 
-export const db = knex(config);
+export const db = knex(knexConfig);
 
 export async function testConnection(): Promise<boolean> {
   try {
