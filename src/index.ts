@@ -6,14 +6,22 @@ const PORT = process.env.PORT || 3000;
 
 async function startServer() {
   try {
+    logger.info(`Attempting to connect to database...`);
+    logger.info(`NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`DATABASE_URL: ${process.env.DATABASE_URL_DEV ? 'Set (dev)' : process.env.DATABASE_URL ? 'Set (prod)' : 'Not set'}`);
+    
     const isConnected = await testConnection();
-    if (!isConnected) {
-      throw new Error('Failed to connect to database');
+    if (isConnected) {
+      logger.info('Database connected successfully');
+      try {
+        await db.migrate.latest();
+        logger.info('Database migrations completed');
+      } catch (migrationError) {
+        logger.warn('Failed to run migrations:', migrationError);
+      }
+    } else {
+      logger.warn('Database connection failed, but continuing to start server');
     }
-    logger.info('Database connected successfully');
-
-    await db.migrate.latest();
-    logger.info('Database migrations completed');
 
     const app = createApp();
     

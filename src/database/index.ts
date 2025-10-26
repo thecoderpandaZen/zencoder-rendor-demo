@@ -1,16 +1,16 @@
 import knex from 'knex';
 import { config as appConfig } from '../config';
 
+const environment = process.env.NODE_ENV || 'development';
+
+const connectionConfig = environment === 'production' 
+  ? process.env.DATABASE_URL || appConfig.database.url
+  : process.env.DATABASE_URL_DEV || process.env.DATABASE_URL || appConfig.database.url;
+
 const knexConfigs: any = {
   development: {
     client: 'postgresql',
-    connection: {
-      host: appConfig.database.host,
-      port: appConfig.database.port,
-      database: appConfig.database.name,
-      user: appConfig.database.user,
-      password: appConfig.database.password,
-    },
+    connection: connectionConfig,
     migrations: {
       directory: './dist/database/migrations',
       extension: 'js',
@@ -18,7 +18,7 @@ const knexConfigs: any = {
   },
   production: {
     client: 'postgresql',
-    connection: appConfig.database.url,
+    connection: connectionConfig,
     migrations: {
       directory: './dist/database/migrations',
       extension: 'js',
@@ -26,7 +26,6 @@ const knexConfigs: any = {
   },
 };
 
-const environment = process.env.NODE_ENV || 'development';
 const knexConfig = knexConfigs[environment];
 
 export const db = knex(knexConfig);
