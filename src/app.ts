@@ -28,6 +28,27 @@ export function createApp(): Express {
   app.use('/api/auth', authRoutes);
   app.use('/api/tasks', taskRoutes);
 
+  app.get('/', (_req, res) => {
+    res.json({
+      success: true,
+      message: 'Welcome to Zencoder Render Demo API',
+      endpoints: {
+        health: '/health',
+        auth: {
+          register: 'POST /api/auth/register',
+          login: 'POST /api/auth/login',
+        },
+        tasks: {
+          list: 'GET /api/tasks',
+          create: 'POST /api/tasks',
+          get: 'GET /api/tasks/:id',
+          update: 'PUT /api/tasks/:id',
+          delete: 'DELETE /api/tasks/:id',
+        },
+      },
+    });
+  });
+
   app.get('/health', (_req, res) => {
     res.json({ success: true, message: 'Server is running' });
   });
