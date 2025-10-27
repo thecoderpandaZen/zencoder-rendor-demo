@@ -1,16 +1,13 @@
 import knex from 'knex';
-import { config as appConfig } from '../config';
 
 const environment = process.env.NODE_ENV || 'development';
 
 const getConnectionConfig = () => {
-  if (environment === 'development' && process.env.DATABASE_URL_DEV) {
-    return {
-      connectionString: process.env.DATABASE_URL_DEV,
-      ssl: { rejectUnauthorized: false },
-    };
-  }
-  return appConfig.database.url;
+  const connectionString = environment === 'production' ? process.env.DATABASE_URL : (process.env.DATABASE_URL_DEV || process.env.DATABASE_URL);
+  return {
+    connectionString,
+    ssl: { rejectUnauthorized: false },
+  };
 };
 
 const knexConfigs: any = {
@@ -24,10 +21,7 @@ const knexConfigs: any = {
   },
   production: {
     client: 'postgresql',
-    connection: {
-      connectionString: appConfig.database.url,
-      ssl: { rejectUnauthorized: false },
-    },
+    connection: getConnectionConfig(),
     migrations: {
       directory: './dist/database/migrations',
       extension: 'js',
